@@ -33,7 +33,7 @@ This project demonstrates a simple two-card layout using HTML and CSS. The layou
 
 ---
 
-## 📋 Features
+## Features
 
 - Two-card layout with borders and padding
 - Float-based layout using classic CSS techniques
@@ -73,11 +73,5 @@ This is a simple HTML + JavaScript web page that checks the strength of a user's
 
 ---
 
-## 🛠️ Technologies Used
-
-- HTML5
-- JavaScript (Vanilla)
-
----
 
 
