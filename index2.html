@@ -7,13 +7,28 @@
   <style>
     .container {
       width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      box-sizing: border-box;
     }
 
     .card {
-      width: 50%;
+      flex: 1 1 300px;
       padding: 20px;
       border: 1px solid #ccc;
-      float: left;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* Media query for small screens */
+    @media (max-width: 768px) {
+      .card {
+        flex: 1 1 100%;
+        margin-bottom: 15px;
+      }
     }
   </style>
 </head>
