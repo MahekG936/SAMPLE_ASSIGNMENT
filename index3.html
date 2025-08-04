@@ -1,31 +1,320 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Password Strength</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      padding: 0 20px;
+    }
+
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 25px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      text-align: left;
+      font-weight: 600;
+      color: #444;
+    }
+
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      padding: 14px 20px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+      outline: none;
+      transition: border-color 0.3s ease;
+      box-sizing: border-box;
+    }
+
+    input[type="password"]:focus, input[type="text"]:focus {
+      border-color: #0053ba;
+      box-shadow: 0 0 8px rgba(0, 83, 186, 0.4);
+    }
+
+    #showPassword {
+      margin-top: 10px;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      color: #0053ba;
+      text-align: left;
+    }
+
+    #requirements {
+      text-align: left;
+      margin: 15px 0 0;
+      font-size: 14px;
+      color: #555;
+    }
+
+    #requirements li {
+      list-style: none;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+    }
+
+    #requirements li span {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      text-align: center;
+      line-height: 15px;
+      font-weight: bold;
+      color: white;
+      font-size: 14px;
+      transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    #requirements li.valid span {
+      background-color: #27ae60;
+      border-color: #27ae60;
+    }
+
+    #requirements li.invalid span {
+      background-color: transparent;
+      border-color: #ccc;
+      color: transparent;
+    }
+
+    .strength-bar {
+      height: 12px;
+      width: 100%;
+      background-color: #eee;
+      border-radius: 8px;
+      margin-top: 15px;
+      overflow: hidden;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .strength-bar-fill {
+      height: 100%;
+      width: 0%;
+      background-color: red;
+      border-radius: 8px;
+      transition: width 0.4s ease, background-color 0.4s ease;
+    }
+
+    #strengthMessage {
+      margin-top: 15px;
+      font-weight: 600;
+      font-size: 18px;
+      min-height: 24px;
+      transition: color 0.3s ease;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 30px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: none;
+      background-color: #0053ba;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+
+    /* Checkmark icon */
+    .checkmark {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background-color: #27ae60;
+      color: white;
+      font-weight: bold;
+      font-size: 14px;
+      line-height: 16px;
+      text-align: center;
+      margin-right: 8px;
+    }
+  </style>
 </head>
 <body>
 
-<h2>Create Your Password</h2>
+  <div class="container" role="form" aria-labelledby="formTitle">
+    <h2 id="formTitle">Create Your Password</h2>
 
-<input type="password" id="password" placeholder="Enter password" />
-<p id="strengthMessage"></p>
+    <label for="password">Password</label>
+    <input type="password" id="password" aria-describedby="passwordHelp" aria-required="true" placeholder="Enter password" />
 
-<script>
-  let password = document.getElementById("password");
-  let message = document.getElementById("strengthMessage");
+    <label id="showPassword"><input type="checkbox" id="togglePassword" /> Show Password</label>
 
-  password.addEventListener("input", function() {
-    if (password.length >= 8 && /[0-9]/.test(password) && /[^a-zA-Z0-9]/.test(password)) {
-      message.textContent = "Strong Password";
-      message.style.color = "green";
-    } else {
-      message.textContent = "Weak Password";
-      message.style.color = "red";
+    <ul id="requirements" aria-live="polite">
+      <li id="req-length" class="invalid"><span>•</span> At least 8 characters</li>
+      <li id="req-upper" class="invalid"><span>•</span> Uppercase letter (A-Z)</li>
+      <li id="req-lower" class="invalid"><span>•</span> Lowercase letter (a-z)</li>
+      <li id="req-number" class="invalid"><span>•</span> Number (0-9)</li>
+      <li id="req-symbol" class="invalid"><span>•</span> Symbol (e.g. !@#$%)</li>
+    </ul>
+
+    <div class="strength-bar" aria-hidden="true">
+      <div class="strength-bar-fill" id="strengthBar"></div>
+    </div>
+    <p id="strengthMessage" aria-live="polite"></p>
+
+    <label for="confirmPassword" style="margin-top: 20px;">Confirm Password</label>
+    <input type="password" id="confirmPassword" placeholder="Re-enter password" aria-required="true" />
+
+    <p id="matchMessage" aria-live="polite" style="font-weight:600; min-height:24px; margin-top:8px;"></p>
+
+    <button id="submitBtn" disabled>Submit</button>
+  </div>
+
+  <script>
+    const password = document.getElementById("password");
+    const confirmPassword = document.getElementById("confirmPassword");
+    const message = document.getElementById("strengthMessage");
+    const matchMessage = document.getElementById("matchMessage");
+    const strengthBar = document.getElementById("strengthBar");
+    const submitBtn = document.getElementById("submitBtn");
+    const togglePassword = document.getElementById("togglePassword");
+
+    // Requirement elements
+    const reqLength = document.getElementById("req-length");
+    const reqUpper = document.getElementById("req-upper");
+    const reqLower = document.getElementById("req-lower");
+    const reqNumber = document.getElementById("req-number");
+    const reqSymbol = document.getElementById("req-symbol");
+
+    function updateRequirement(elem, isValid) {
+      elem.classList.toggle("valid", isValid);
+      elem.classList.toggle("invalid", !isValid);
+      elem.querySelector("span").textContent = isValid ? "✔" : "•";
     }
-  });
-</script>
+
+    function checkPasswordStrength(val) {
+      const lengthValid = val.length >= 8;
+      const hasUpper = /[A-Z]/.test(val);
+      const hasLower = /[a-z]/.test(val);
+      const hasNumber = /[0-9]/.test(val);
+      const hasSymbol = /[^a-zA-Z0-9]/.test(val);
+
+      updateRequirement(reqLength, lengthValid);
+      updateRequirement(reqUpper, hasUpper);
+      updateRequirement(reqLower, hasLower);
+      updateRequirement(reqNumber, hasNumber);
+      updateRequirement(reqSymbol, hasSymbol);
+
+      let strength = 0;
+      if (lengthValid) strength++;
+      if (hasUpper) strength++;
+      if (hasLower) strength++;
+      if (hasNumber) strength++;
+      if (hasSymbol) strength++;
+
+      return { strength, lengthValid, hasUpper, hasLower, hasNumber, hasSymbol };
+    }
+
+    function updateUI() {
+      const val = password.value;
+      const confirmVal = confirmPassword.value;
+
+      if (val.length === 0) {
+        message.textContent = "";
+        strengthBar.style.width = "0%";
+        strengthBar.style.backgroundColor = "#eee";
+        submitBtn.disabled = true;
+        matchMessage.textContent = "";
+        return;
+      }
+
+      const { strength, lengthValid } = checkPasswordStrength(val);
+
+      if (!lengthValid) {
+        message.textContent = "Password must be at least 8 characters";
+        message.style.color = "#e74c3c";
+        strengthBar.style.width = "10%";
+        strengthBar.style.backgroundColor = "#e74c3c";
+        submitBtn.disabled = true;
+      } else if (strength < 4) {
+        message.textContent = "Weak Password";
+        message.style.color = "#e74c3c";
+        strengthBar.style.width = "40%";
+        strengthBar.style.backgroundColor = "#e74c3c";
+        submitBtn.disabled = true;
+      } else if (strength === 4) {
+        message.textContent = "Medium Password";
+        message.style.color = "#f39c12";
+        strengthBar.style.width = "70%";
+        strengthBar.style.backgroundColor = "#f39c12";
+        submitBtn.disabled = true;
+      } else if (strength === 5) {
+        message.textContent = "Strong Password";
+        message.style.color = "#27ae60";
+        strengthBar.style.width = "100%";
+        strengthBar.style.backgroundColor = "#27ae60";
+        // Don't enable submit yet — must check match next
+      }
+
+      // Check password match if password is strong enough
+      if (strength === 5) {
+        if (confirmVal.length === 0) {
+          matchMessage.textContent = "";
+          submitBtn.disabled = true;
+        } else if (val === confirmVal) {
+          matchMessage.textContent = "Passwords match ✔";
+          matchMessage.style.color = "#27ae60";
+          submitBtn.disabled = false;
+        } else {
+          matchMessage.textContent = "Passwords do not match";
+          matchMessage.style.color = "#e74c3c";
+          submitBtn.disabled = true;
+        }
+      } else {
+        matchMessage.textContent = "";
+        submitBtn.disabled = true;
+      }
+    }
+
+    password.addEventListener("input", updateUI);
+    confirmPassword.addEventListener("input", updateUI);
+
+    togglePassword.addEventListener("change", () => {
+      const type = togglePassword.checked ? "text" : "password";
+      password.type = type;
+      confirmPassword.type = type;
+    });
+
+    submitBtn.addEventListener("click", () => {
+      alert("Password accepted!");
+      // Add your form submission logic here
+    });
+  </script>
 
 </body>
 </html>
